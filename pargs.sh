@@ -3,9 +3,6 @@
 # argument parser
 #
 pargs() {
-
-	[[ "$(type -t msg)" != 'function' ]] && . "$(dirname "$BASH_SOURCE")/msg.sh"
-
 	local usagefn="$1"; shift
 	local args=$($usagefn | awk -F '  ' '/^  -/ { print $2 }')
 	local positionals=()
@@ -39,7 +36,7 @@ pargs() {
 				local arg=$(awk -F ', ' "/^$1| $1/ { if (NF > 1) { print \$2 } else { print \$1 } }" <<< "$args")
 				# exit if this is an unknown argument
 				if [[ ! "$arg" ]]; then
-					msg error 1 "unknown argument $1"
+					>&2 printf "$(tput bold; tput setaf 1)error:$(tput sgr0) %s\n" "unknown argument $1"
 					return 1
 				fi
 
@@ -60,7 +57,7 @@ pargs() {
 
 					# no value passed, check for requirement
 					if [[ "${type::1}" != '[' ]]; then
-						msg error 1 "$name requires an argument"
+						>&2 printf "$(tput bold; tput setaf 1)error:$(tput sgr0) %s\n" "$name requires an argument"
 						return 1
 					fi
 				fi	
@@ -75,7 +72,6 @@ pargs() {
 				;;
 		esac
 	done
-	
-	ARGS[_]=$(printf '%s\n' "${positionals[@]}")
+	ARGS[_]=$(printf '\n%s' "${positionals[@]}")
 }
 
